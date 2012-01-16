@@ -3,23 +3,16 @@
 #   
 #   © KNowicki 2012
 ######################################################
-
-
 # encoding: utf-8
 
 require 'rubygems'
 require "bundler/setup"
-require 'mechanize'
-require "timeout"
 require 'open-uri'
 
 
-######################################################
-#   Benchmark
-#   Statistics for better randomization options
-######################################################
 
-class Benchmark    
+#   Statistics for better randomization setup
+class Stat
     def initialize
         @successes = 0
         @fails = 0
@@ -57,18 +50,29 @@ private
 end
 
 
-######################################################
-#   Agent
 #   Geting image and storing it in /download
-#   using Benchmark class
-######################################################
-
+#   use Benchmark class
 class Agent
-    attr_reader :benchmark
+    attr_reader :stats
 
     def initialize
-        @agent = Mechanize.new
-        @benchmark = Benchmark.new
+        @stats = Stat.new
+    end
+
+public
+    def get_image(uri)
+        begin
+            res = open(uri)
+            if res.size > 700
+                open(make_name(uri, res.content_type), 'wb') { |file| file << res.read }
+                @stats.add_success(exclude_pattern_ext(uri).length)
+            else
+                @stats.add_fail
+            end
+        rescue
+            puts 'err.'
+            @stats.add_fail
+        end
     end
 
 private
@@ -76,41 +80,22 @@ private
         File.expand_path(__FILE__, Dir.getwd).gsub(/(bin)+(\/)(\w)+.(rb)$/,"")
     end
 
-    def recognize_origin_ext(uri)   #ext mean extension
-        @agent.get(uri).response["content-type"].gsub(/^(\w)+(\/)/,"")
-    end
-
-    def fname_exclude_ext(uri)      #ext mean extension
+    def exclude_pattern_ext(uri)
         uri[/(\w)+.(\w){3}$/].gsub(/.(\w){3}$/, "" )
     end
 
-    def make_name(uri)
-        "#{current_dir}download/#{fname_exclude_ext(uri)}.#{recognize_origin_ext(uri)}"
+    def get_original_ext(type)
+        type.gsub(/^(\w)+(\/)/,"")
     end
 
-public
-    def get_image(uri)
-        begin
-            content = open(uri)
-            if content.size > 700
-                open(make_name(uri), 'wb') { |file| file << content.read }
-                @benchmark.add_success(fname_exclude_ext(uri).length)
-            else
-                @benchmark.add_fail
-            end
-        rescue
-            puts 'err.'
-            @benchmark.add_fail
-        end
+    def make_name(uri, type)
+        full_name = "#{exclude_pattern_ext(uri)}.#{get_original_ext(type)}"
+        "#{current_dir}download/#{full_name}"
     end
 end
 
-######################################################
-#   Randomizer
-#   Randomize uri. Read benchmark stats for better 
-#                  parameters setup.
-######################################################
-
+#   Randomize uri. 
+# Read benchmark stats for better parameters setup.
 class Randomizer
     def initialize(base_uri = "http://i.imgur.com/")
         @base_uri = base_uri
@@ -131,20 +116,14 @@ end
 
 
 
-
-######################################################
-#
 #   Main loop
-######################################################
-
-
 rand = Randomizer.new
 agent = Agent.new
 
-1000.times do
+100.times do
     uri = rand.randomize_uri
     puts uri
     agent.get_image(uri)
-    puts agent.benchmark.get_result
 end
+puts agent.stats.get_result
 
