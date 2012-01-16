@@ -7,6 +7,7 @@
 
 require 'rubygems'
 require 'open-uri'
+require 'fileutils'
 
 
 
@@ -72,6 +73,10 @@ public
         end
     end
 
+    def mk_download_dir
+        FileUtils.mkdir_p "#{current_dir}/download"
+    end
+
 private
     def current_dir
         File.expand_path(__FILE__, Dir.getwd).gsub(/(bin)+(\/)(\w)+.(rb)$/,"")
@@ -116,6 +121,7 @@ end
 #   Main loop
 rand = Randomizer.new
 agent = Agent.new
+agent.mk_download_dir
 
 100.times do
     uri = rand.randomize_uri
