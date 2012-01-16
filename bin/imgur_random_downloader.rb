@@ -35,14 +35,12 @@ Average filename length: #{average_fname_length}"
 
 private
     def shots_accuracy
-        ((@successes.to_f/(@fails + @successes))*100).round(3)
+        ( ( @successes.to_f / (@fails + @successes) ) * 100 ).round(3)
     end
 
     def average_fname_length
         if @lengths.count > 0
-            sum = 0.0
-            @lengths.each { |length| sum += length }
-            return (sum / @lengths.count).round(2)
+            ( @lengths.inject(:+).to_f / @lengths.count ).round(2)
         else
             "_unknown_yet_"
         end
