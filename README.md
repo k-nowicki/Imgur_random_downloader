@@ -5,10 +5,8 @@ Funny Ruby script for downloading random images from imgur.com
 ## Prerequirements:
  * Ruby 1.9.x
 
-## Instalation
-    $ cd imgur_random_downloader
-
 ## Start
+    $ cd imgur_random_downloader
     $ ruby bin/imgur_random_downloader
 
 ## License
