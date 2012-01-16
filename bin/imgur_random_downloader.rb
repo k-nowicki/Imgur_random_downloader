@@ -6,7 +6,6 @@
 # encoding: utf-8
 
 require 'rubygems'
-require "bundler/setup"
 require 'open-uri'
 
 
@@ -49,7 +48,7 @@ end
 
 
 #   Geting image and storing it in /download
-#   use Benchmark class
+#   use Stat class
 class Agent
     attr_reader :stats
 
@@ -93,7 +92,7 @@ private
 end
 
 #   Randomize uri. 
-# Read benchmark stats for better parameters setup.
+# Read stats for better parameters setup.
 class Randomizer
     def initialize(base_uri = "http://i.imgur.com/")
         @base_uri = base_uri
